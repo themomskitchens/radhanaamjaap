@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:Poppins;
-  background:#050008;
+  background:#040007;
   color:#fff;
   overflow:hidden;
 }
@@ -26,24 +26,24 @@ body{
 
 .card{
   width:90%;
-  max-width:420px;
+  max-width:430px;
   background:rgba(255,255,255,0.07);
-  backdrop-filter:blur(20px);
-  border-radius:26px;
+  backdrop-filter:blur(22px);
+  border-radius:28px;
   padding:30px;
   text-align:center;
-  box-shadow:0 0 50px rgba(255,0,200,.35);
+  box-shadow:0 0 60px rgba(255,0,200,.4);
 }
 
 h1,h2{
   font-family:Cinzel;
-  margin-bottom:10px;
+  margin-bottom:12px;
 }
 
 input,button{
   width:100%;
   padding:14px;
-  border-radius:14px;
+  border-radius:16px;
   border:none;
   margin-top:15px;
   font-size:16px;
@@ -52,6 +52,27 @@ button{
   background:linear-gradient(135deg,#ffd700,#ff7a00);
   font-weight:600;
   cursor:pointer;
+}
+button.secondary{
+  background:linear-gradient(135deg,#ff4dd2,#8f00ff);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-top:20px;
+}
+.stat{
+  background:rgba(0,0,0,.45);
+  border-radius:16px;
+  padding:12px;
+}
+.stat span{
+  display:block;
+  font-size:22px;
+  font-weight:600;
+  margin-top:6px;
 }
 
 #overlay{
@@ -71,33 +92,15 @@ button{
 }
 @keyframes pop{
   0%{opacity:0;transform:scale(.4)}
-  40%{opacity:1;transform:scale(1.4)}
+  40%{opacity:1;transform:scale(1.5)}
   100%{opacity:0;transform:scale(1)}
 }
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-top:20px;
-}
-.stat{
-  background:rgba(0,0,0,.4);
-  border-radius:14px;
-  padding:12px;
-}
-.stat span{
-  display:block;
-  font-size:22px;
-  font-weight:600;
-  margin-top:5px;
-}
-
 </style>
 </head>
+
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="loginScreen" class="screen">
   <div class="card">
     <h1>🙏 Radha Naam</h1>
@@ -107,17 +110,19 @@ button{
   </div>
 </div>
 
-<!-- JAAP SCREEN -->
+<!-- JAAP -->
 <div id="jaapScreen" class="screen hidden">
   <div class="card">
     <h2 id="welcome"></h2>
-    <button id="startBtn">Start Jaap</button>
+
+    <button id="startBtn">🎤 Start Naam Jaap</button>
+    <button class="secondary" onclick="addJaap()">🖐️ Man Se Jaap</button>
 
     <div class="stats">
       <div class="stat">Today<span id="today">0</span></div>
       <div class="stat">Yesterday<span id="yesterday">0</span></div>
-      <div class="stat">Week<span id="week">0</span></div>
-      <div class="stat">Month<span id="month">0</span></div>
+      <div class="stat">This Week<span id="week">0</span></div>
+      <div class="stat">This Month<span id="month">0</span></div>
       <div class="stat" style="grid-column:span 2">
         Total<span id="total">0</span>
       </div>
@@ -143,10 +148,11 @@ function login(){
 
 /* DATE HELPERS */
 const todayStr=()=>new Date().toISOString().slice(0,10);
-const getWeekKey=()=>{
+const yesterdayStr=()=>new Date(Date.now()-86400000).toISOString().slice(0,10);
+const weekStart=()=>{
   const d=new Date();
-  const first=new Date(d.setDate(d.getDate()-d.getDay()));
-  return first.toISOString().slice(0,10);
+  d.setDate(d.getDate()-d.getDay());
+  return d.toISOString().slice(0,10);
 }
 const monthKey=()=>new Date().toISOString().slice(0,7);
 
@@ -154,9 +160,10 @@ const monthKey=()=>new Date().toISOString().slice(0,7);
 let data=JSON.parse(localStorage.getItem("jaapData")||"{}");
 let lastHit=0;
 
+/* ADD JAAP (VOICE + BUTTON SAME) */
 function addJaap(){
   const now=Date.now();
-  if(now-lastHit<600) return; // duplicate protection
+  if(now-lastHit<400) return;
   lastHit=now;
 
   const t=todayStr();
@@ -168,14 +175,14 @@ function addJaap(){
   loadStats();
 }
 
+/* STATS */
 function loadStats(){
   const t=todayStr();
-  const y=new Date(Date.now()-86400000).toISOString().slice(0,10);
-  const wk=getWeekKey();
+  const y=yesterdayStr();
+  const wk=weekStart();
   const mk=monthKey();
 
   let total=0,week=0,month=0;
-
   for(let d in data){
     total+=data[d];
     if(d>=wk) week+=data[d];
@@ -203,7 +210,12 @@ function showOverlay(){
 /* SPEECH */
 let rec,listening=false;
 startBtn.onclick=()=>{
-  if(listening){rec.stop();startBtn.innerText="Start Jaap";listening=false;return;}
+  if(listening){
+    rec.stop();
+    startBtn.innerText="🎤 Start Naam Jaap";
+    listening=false;
+    return;
+  }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   rec=new SR();
   rec.lang="en-IN";
@@ -214,12 +226,13 @@ startBtn.onclick=()=>{
     if(txt.includes("radha")) addJaap();
   };
   rec.start();
-  startBtn.innerText="Stop Jaap";
+  startBtn.innerText="⏹️ Stop Naam Jaap";
   listening=true;
 };
 
 /* AUTO LOGIN */
 if(localStorage.getItem("bhakt")) login();
 </script>
+
 </body>
 </html>
