@@ -1,226 +1,203 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radha Naam Jaap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
-  font-family:Poppins,sans-serif;
-  background:#000;
+  font-family:Poppins,Arial;
+  background:radial-gradient(circle at top,#2a003d,#050008);
   color:#fff;
+}
+.hidden{display:none}
+
+.glow-bg{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(255,0,200,.25),transparent 40%),
+    radial-gradient(circle at 80% 30%,rgba(0,200,255,.25),transparent 45%),
+    radial-gradient(circle at 50% 80%,rgba(255,180,0,.25),transparent 50%);
+  animation:bgmove 12s infinite alternate;
+  z-index:-1;
+}
+@keyframes bgmove{from{filter:hue-rotate(0)}to{filter:hue-rotate(60deg)}}
+
+.container{
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
+  padding:20px;
 }
-.container{
+.card{
   width:100%;
   max-width:420px;
-  padding:20px;
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(18px);
+  border-radius:26px;
+  padding:32px;
+  box-shadow:0 0 45px rgba(255,0,200,.35);
   text-align:center;
 }
-.hidden{display:none}
+
+h1,h2{font-family:Cinzel}
+
 input,button{
   width:100%;
   padding:14px;
+  margin-top:16px;
+  border-radius:14px;
   border:none;
-  border-radius:10px;
-  margin:12px 0;
   font-size:16px;
 }
+input{outline:none}
+
 button{
-  background:linear-gradient(135deg,#ff9800,#ff5722);
-  color:#000;
+  background:linear-gradient(135deg,#ffcc00,#ff7a00);
+  font-weight:700;
   cursor:pointer;
+  position:relative;
+  z-index:10;
 }
 
-.circle{
-  width:180px;
-  height:180px;
-  border-radius:50%;
-  margin:20px auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:36px;
-  box-shadow:0 0 25px #ff9800;
+#jaapText{
+  font-size:44px;
+  margin:22px 0;
+  text-shadow:0 0 20px #ffb3ff,0 0 45px #ff33ff;
 }
-.pulse{
-  animation:pulse 1.4s infinite;
-}
-@keyframes pulse{
-  0%{box-shadow:0 0 15px #ff9800}
-  50%{box-shadow:0 0 45px #ff5722}
-  100%{box-shadow:0 0 15px #ff9800}
-}
-
-.mantra{
-  font-size:26px;
-  min-height:36px;
-  margin:10px 0;
-}
-.speak{
-  animation:speak 0.6s ease;
-}
-@keyframes speak{
-  0%{transform:scale(1);opacity:.6}
-  50%{transform:scale(1.2);opacity:1}
-  100%{transform:scale(1);opacity:.9}
-}
+.pulse{animation:pulse .25s}
+@keyframes pulse{0%{scale:1}50%{scale:1.4}100%{scale:1}}
 
 .stats{
-  font-size:14px;
-  margin-top:12px;
-  opacity:.9;
+  display:flex;
+  gap:10px;
 }
-.small{
-  font-size:12px;
-  opacity:.7;
+.stat{
+  flex:1;
+  background:rgba(0,0,0,.35);
+  padding:14px;
+  border-radius:16px;
 }
+.stat span{font-size:22px;font-weight:700}
 </style>
 </head>
 
 <body>
+<div class="glow-bg"></div>
 
-<div class="container">
-
-<!-- LOGIN SCREEN -->
-<div id="loginScreen">
-  <h2>Radha Naam Jaap</h2>
-  <input id="mobile" placeholder="Mobile Number">
-  <button onclick="login()">Login</button>
+<!-- LOGIN -->
+<div id="login" class="container">
+  <div class="card">
+    <h1>🙏 Radha Naam</h1>
+    <p>Bhakti ka digital jaap</p>
+    <form id="loginForm">
+      <input id="username" type="tel" placeholder="Mobile / Bhakt Naam" required>
+      <button type="submit">Pravesh Karein</button>
+    </form>
+  </div>
 </div>
 
-<!-- JAAP SCREEN -->
-<div id="jaapScreen" class="hidden">
-  <div id="circle" class="circle">ॐ</div>
+<!-- APP -->
+<div id="app" class="container hidden">
+  <div class="card">
+    <h2 id="welcome"></h2>
+    <div id="jaapText">📿</div>
+    <button id="startBtn">Start Jaap</button>
 
-  <div id="mantra" class="mantra"></div>
-
-  <button id="startBtn" onclick="toggleJaap()">Start Jaap</button>
-
-  <div id="stats" class="stats"></div>
-  <div class="small">🔔 Bell every 108 • 🎧 Background Mantra</div>
+    <div class="stats">
+      <div class="stat">Aaj<br><span id="todayCount">0</span></div>
+      <div class="stat">Total<br><span id="totalCount">0</span></div>
+    </div>
+  </div>
 </div>
 
-</div>
-
-<!-- AUDIO -->
-<audio id="bgAudio" loop>
-  <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_6c9b8c4c1b.mp3">
-</audio>
-
-<audio id="bell">
-  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_3b2c9d8c3c.mp3">
-</audio>
+<audio id="bell" src="https://actions.google.com/sounds/v1/bells/temple_bell.ogg"></audio>
+<audio id="bg" loop src="https://cdn.pixabay.com/audio/2022/03/09/audio_77f8b77a34.mp3"></audio>
 
 <script>
-let listening=false;
+const login=document.getElementById("login");
+const app=document.getElementById("app");
+const usernameInput=document.getElementById("username");
+const welcome=document.getElementById("welcome");
+const todayCount=document.getElementById("todayCount");
+const totalCount=document.getElementById("totalCount");
+const jaapText=document.getElementById("jaapText");
+const bell=document.getElementById("bell");
+const bg=document.getElementById("bg");
+const startBtn=document.getElementById("startBtn");
 
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-const recognition=SpeechRecognition?new SpeechRecognition():null;
+const today=new Date().toISOString().slice(0,10);
+let data=JSON.parse(localStorage.getItem("jaapData")||"{}");
+if(!data[today])data[today]=0;
 
-if(recognition){
-  recognition.lang='hi-IN';
+function getTotal(){return Object.values(data).reduce((a,b)=>a+b,0)}
+function updateUI(){
+  todayCount.innerText=data[today];
+  totalCount.innerText=getTotal();
+}
+
+document.getElementById("loginForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const name=usernameInput.value.trim();
+  if(!name){alert("Naam / Number dalo");return;}
+  localStorage.setItem("bhakt",name);
+  startApp();
+});
+
+function startApp(){
+  const name=localStorage.getItem("bhakt");
+  if(!name)return;
+  login.classList.add("hidden");
+  app.classList.remove("hidden");
+  welcome.innerText="Radha Naam – "+name;
+  updateUI();
+}
+startApp();
+
+/* JAAP */
+function addJaap(){
+  data[today]++;
+  localStorage.setItem("jaapData",JSON.stringify(data));
+  jaapText.innerText="Radha 📿";
+  jaapText.classList.remove("pulse"); void jaapText.offsetWidth;
+  jaapText.classList.add("pulse");
+  if(data[today]%108===0) bell.play();
+  updateUI();
+}
+
+/* SPEECH */
+let recognition,listening=false;
+startBtn.onclick=()=>{
+  if(listening){
+    recognition.stop();
+    listening=false;
+    startBtn.innerText="Start Jaap";
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang="en-IN";
   recognition.continuous=true;
   recognition.onresult=e=>{
-    const text=e.results[e.results.length-1][0].transcript.toLowerCase();
-    const mantra=document.getElementById('mantra');
-    mantra.innerText=text;
-    mantra.classList.add('speak');
-    setTimeout(()=>mantra.classList.remove('speak'),400);
-
-    const matches=text.match(/radha|राधा/g);
-    if(matches){
-      addJaap(matches.length);
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i][0].transcript.toLowerCase().includes("radha")){
+        addJaap();
+      }
     }
-  }
-}
-
-function login(){
-  const m=document.getElementById('mobile').value.trim();
-  if(!m) return alert('Mobile number required');
-
-  localStorage.setItem('user',m);
-  if(!localStorage.getItem(m)){
-    localStorage.setItem(m,JSON.stringify({
-      total:0,
-      daily:{},
-      weekly:{}
-    }));
-  }
-
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('jaapScreen').classList.remove('hidden');
-  updateStats();
-}
-
-function toggleJaap(){
-  const btn=document.getElementById('startBtn');
-  const circle=document.getElementById('circle');
-  const bg=document.getElementById('bgAudio');
-
-  if(!listening){
-    listening=true;
-    btn.innerText='Stop Jaap';
-    circle.classList.add('pulse');
-    bg.play();
-    if(recognition) recognition.start();
-  }else{
-    listening=false;
-    btn.innerText='Start Jaap';
-    circle.classList.remove('pulse');
-    bg.pause();
-    if(recognition) recognition.stop();
-  }
-}
-
-function addJaap(count){
-  const user=localStorage.getItem('user');
-  const data=JSON.parse(localStorage.getItem(user));
-
-  for(let i=0;i<count;i++){
-    data.total++;
-
-    if(data.total % 108 === 0){
-      document.getElementById('bell').play();
-    }
-
-    const today=new Date().toISOString().slice(0,10);
-    data.daily[today]=(data.daily[today]||0)+1;
-
-    const week=getWeek();
-    data.weekly[week]=(data.weekly[week]||0)+1;
-  }
-
-  localStorage.setItem(user,JSON.stringify(data));
-  updateStats();
-}
-
-function getWeek(){
-  const d=new Date();
-  const onejan=new Date(d.getFullYear(),0,1);
-  return d.getFullYear()+'-W'+Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
-}
-
-function updateStats(){
-  const user=localStorage.getItem('user');
-  const data=JSON.parse(localStorage.getItem(user));
-  const today=new Date().toISOString().slice(0,10);
-  const week=getWeek();
-
-  document.getElementById('stats').innerHTML=`
-    Total Jaap: <b>${data.total}</b><br>
-    Today: <b>${data.daily[today]||0}</b><br>
-    This Week: <b>${data.weekly[week]||0}</b>
-  `;
-}
+  };
+  recognition.start();
+  bg.play();
+  listening=true;
+  startBtn.innerText="Stop Jaap";
+};
 </script>
-
 </body>
 </html>
