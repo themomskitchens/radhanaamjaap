@@ -5,199 +5,221 @@
 <title>Radha Naam Jaap</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-  margin:0;
-  font-family:Poppins,Arial;
-  background:radial-gradient(circle at top,#2a003d,#050008);
+  font-family:Poppins;
+  background:#050008;
   color:#fff;
+  overflow:hidden;
 }
-.hidden{display:none}
-
-.glow-bg{
+.screen{
   position:fixed;
   inset:0;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 20% 20%,rgba(255,0,200,.25),transparent 40%),
-    radial-gradient(circle at 80% 30%,rgba(0,200,255,.25),transparent 45%),
-    radial-gradient(circle at 50% 80%,rgba(255,180,0,.25),transparent 50%);
-  animation:bgmove 12s infinite alternate;
-  z-index:-1;
-}
-@keyframes bgmove{from{filter:hue-rotate(0)}to{filter:hue-rotate(60deg)}}
-
-.container{
-  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:20px;
 }
+.hidden{display:none}
+
 .card{
-  width:100%;
+  width:90%;
   max-width:420px;
-  background:rgba(255,255,255,.07);
-  backdrop-filter:blur(18px);
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(20px);
   border-radius:26px;
-  padding:32px;
-  box-shadow:0 0 45px rgba(255,0,200,.35);
+  padding:30px;
   text-align:center;
+  box-shadow:0 0 50px rgba(255,0,200,.35);
 }
 
-h1,h2{font-family:Cinzel}
+h1,h2{
+  font-family:Cinzel;
+  margin-bottom:10px;
+}
 
 input,button{
   width:100%;
   padding:14px;
-  margin-top:16px;
   border-radius:14px;
   border:none;
+  margin-top:15px;
   font-size:16px;
 }
-input{outline:none}
-
 button{
-  background:linear-gradient(135deg,#ffcc00,#ff7a00);
-  font-weight:700;
+  background:linear-gradient(135deg,#ffd700,#ff7a00);
+  font-weight:600;
   cursor:pointer;
-  position:relative;
-  z-index:10;
 }
 
-#jaapText{
-  font-size:44px;
-  margin:22px 0;
-  text-shadow:0 0 20px #ffb3ff,0 0 45px #ff33ff;
+#overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:64px;
+  font-family:Cinzel;
+  pointer-events:none;
+  opacity:0;
+  text-shadow:0 0 30px #ffb3ff,0 0 60px #ff33ff;
 }
-.pulse{animation:pulse .25s}
-@keyframes pulse{0%{scale:1}50%{scale:1.4}100%{scale:1}}
+.overlay-anim{
+  animation:pop .4s ease forwards;
+}
+@keyframes pop{
+  0%{opacity:0;transform:scale(.4)}
+  40%{opacity:1;transform:scale(1.4)}
+  100%{opacity:0;transform:scale(1)}
+}
 
 .stats{
-  display:flex;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
   gap:10px;
+  margin-top:20px;
 }
 .stat{
-  flex:1;
-  background:rgba(0,0,0,.35);
-  padding:14px;
-  border-radius:16px;
+  background:rgba(0,0,0,.4);
+  border-radius:14px;
+  padding:12px;
 }
-.stat span{font-size:22px;font-weight:700}
+.stat span{
+  display:block;
+  font-size:22px;
+  font-weight:600;
+  margin-top:5px;
+}
+
 </style>
 </head>
-
 <body>
-<div class="glow-bg"></div>
 
-<!-- LOGIN -->
-<div id="login" class="container">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen">
   <div class="card">
     <h1>🙏 Radha Naam</h1>
-    <p>Bhakti ka digital jaap</p>
-    <form id="loginForm">
-      <input id="username" type="tel" placeholder="Mobile / Bhakt Naam" required>
-      <button type="submit">Pravesh Karein</button>
-    </form>
+    <p>Digital Bhakti Anubhav</p>
+    <input id="nameInput" placeholder="Bhakt ka naam">
+    <button onclick="login()">Pravesh</button>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app" class="container hidden">
+<!-- JAAP SCREEN -->
+<div id="jaapScreen" class="screen hidden">
   <div class="card">
     <h2 id="welcome"></h2>
-    <div id="jaapText">📿</div>
     <button id="startBtn">Start Jaap</button>
 
     <div class="stats">
-      <div class="stat">Aaj<br><span id="todayCount">0</span></div>
-      <div class="stat">Total<br><span id="totalCount">0</span></div>
+      <div class="stat">Today<span id="today">0</span></div>
+      <div class="stat">Yesterday<span id="yesterday">0</span></div>
+      <div class="stat">Week<span id="week">0</span></div>
+      <div class="stat">Month<span id="month">0</span></div>
+      <div class="stat" style="grid-column:span 2">
+        Total<span id="total">0</span>
+      </div>
     </div>
   </div>
 </div>
 
+<div id="overlay">Radha</div>
+
 <audio id="bell" src="https://actions.google.com/sounds/v1/bells/temple_bell.ogg"></audio>
-<audio id="bg" loop src="https://cdn.pixabay.com/audio/2022/03/09/audio_77f8b77a34.mp3"></audio>
 
 <script>
-const login=document.getElementById("login");
-const app=document.getElementById("app");
-const usernameInput=document.getElementById("username");
-const welcome=document.getElementById("welcome");
-const todayCount=document.getElementById("todayCount");
-const totalCount=document.getElementById("totalCount");
-const jaapText=document.getElementById("jaapText");
-const bell=document.getElementById("bell");
-const bg=document.getElementById("bg");
-const startBtn=document.getElementById("startBtn");
+/* LOGIN */
+function login(){
+  const n=nameInput.value.trim();
+  if(!n) return;
+  localStorage.setItem("bhakt",n);
+  loginScreen.classList.add("hidden");
+  jaapScreen.classList.remove("hidden");
+  welcome.innerText="Radha Naam – "+n;
+  loadStats();
+}
 
-const today=new Date().toISOString().slice(0,10);
+/* DATE HELPERS */
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const getWeekKey=()=>{
+  const d=new Date();
+  const first=new Date(d.setDate(d.getDate()-d.getDay()));
+  return first.toISOString().slice(0,10);
+}
+const monthKey=()=>new Date().toISOString().slice(0,7);
+
+/* DATA */
 let data=JSON.parse(localStorage.getItem("jaapData")||"{}");
-if(!data[today])data[today]=0;
+let lastHit=0;
 
-function getTotal(){return Object.values(data).reduce((a,b)=>a+b,0)}
-function updateUI(){
-  todayCount.innerText=data[today];
-  totalCount.innerText=getTotal();
-}
-
-document.getElementById("loginForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  const name=usernameInput.value.trim();
-  if(!name){alert("Naam / Number dalo");return;}
-  localStorage.setItem("bhakt",name);
-  startApp();
-});
-
-function startApp(){
-  const name=localStorage.getItem("bhakt");
-  if(!name)return;
-  login.classList.add("hidden");
-  app.classList.remove("hidden");
-  welcome.innerText="Radha Naam – "+name;
-  updateUI();
-}
-startApp();
-
-/* JAAP */
 function addJaap(){
-  data[today]++;
+  const now=Date.now();
+  if(now-lastHit<600) return; // duplicate protection
+  lastHit=now;
+
+  const t=todayStr();
+  data[t]=(data[t]||0)+1;
   localStorage.setItem("jaapData",JSON.stringify(data));
-  jaapText.innerText="Radha 📿";
-  jaapText.classList.remove("pulse"); void jaapText.offsetWidth;
-  jaapText.classList.add("pulse");
-  if(data[today]%108===0) bell.play();
-  updateUI();
+
+  showOverlay();
+  if(data[t]%108===0) bell.play();
+  loadStats();
+}
+
+function loadStats(){
+  const t=todayStr();
+  const y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const wk=getWeekKey();
+  const mk=monthKey();
+
+  let total=0,week=0,month=0;
+
+  for(let d in data){
+    total+=data[d];
+    if(d>=wk) week+=data[d];
+    if(d.startsWith(mk)) month+=data[d];
+  }
+
+  today.innerText=data[t]||0;
+  yesterday.innerText=data[y]||0;
+  weekEl.innerText=week;
+  monthEl.innerText=month;
+  totalEl.innerText=total;
+}
+
+const weekEl=document.getElementById("week");
+const monthEl=document.getElementById("month");
+const totalEl=document.getElementById("total");
+
+/* OVERLAY */
+function showOverlay(){
+  overlay.classList.remove("overlay-anim");
+  void overlay.offsetWidth;
+  overlay.classList.add("overlay-anim");
 }
 
 /* SPEECH */
-let recognition,listening=false;
+let rec,listening=false;
 startBtn.onclick=()=>{
-  if(listening){
-    recognition.stop();
-    listening=false;
-    startBtn.innerText="Start Jaap";
-    return;
-  }
+  if(listening){rec.stop();startBtn.innerText="Start Jaap";listening=false;return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SR();
-  recognition.lang="en-IN";
-  recognition.continuous=true;
-  recognition.onresult=e=>{
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i][0].transcript.toLowerCase().includes("radha")){
-        addJaap();
-      }
-    }
+  rec=new SR();
+  rec.lang="en-IN";
+  rec.continuous=true;
+  rec.interimResults=true;
+  rec.onresult=e=>{
+    const txt=e.results[e.results.length-1][0].transcript.toLowerCase();
+    if(txt.includes("radha")) addJaap();
   };
-  recognition.start();
-  bg.play();
-  listening=true;
+  rec.start();
   startBtn.innerText="Stop Jaap";
+  listening=true;
 };
+
+/* AUTO LOGIN */
+if(localStorage.getItem("bhakt")) login();
 </script>
 </body>
 </html>
